@@ -1,12 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { ApiRequestError, debtsApi } from "@/lib/client-api";
 import type { Debt } from "@/lib/types";
 import Summary from "@/components/Summary";
 import FilterBar, { type StatusFilter, type TypeFilter } from "@/components/FilterBar";
 import DebtList from "@/components/DebtList";
+import DebtFormModal from "@/components/DebtFormModal";
 
 export default function Dashboard() {
   const [all, setAll] = useState<Debt[]>([]); // untuk summary (tanpa filter)
@@ -16,6 +17,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // undefined = modal tertutup, null = catat baru, Debt = edit
+  const [editing, setEditing] = useState<Debt | null | undefined>(undefined);
 
   const load = useCallback(async () => {
     try {
@@ -61,6 +64,10 @@ export default function Dashboard() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <FilterBar status={status} type={type} onStatus={setStatus} onType={setType} />
+        <button onClick={() => setEditing(null)}
+          className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700">
+          <Plus size={16} /> Catat baru
+        </button>
       </div>
 
       {error && <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}
@@ -68,7 +75,18 @@ export default function Dashboard() {
       {loading ? (
         <div className="flex justify-center py-12 text-slate-400"><Loader2 className="animate-spin" /></div>
       ) : (
-        <DebtList debts={debts} busyId={busyId} onToggleSettled={toggleSettled} onDelete={remove} />
+        <DebtList debts={debts} busyId={busyId} onToggleSettled={toggleSettled} onEdit={setEditing} onDelete={remove} />
+      )}
+
+      {editing !== undefined && (
+        <DebtFormModal
+          debt={editing}
+          onClose={() => setEditing(undefined)}
+          onSaved={() => {
+            setEditing(undefined);
+            void load();
+          }}
+        />
       )}
     </div>
   );
