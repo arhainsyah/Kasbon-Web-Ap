@@ -27,6 +27,11 @@ cp .env.example .env.local
 ```
 Isi `NEXT_PUBLIC_SUPABASE_URL` dan `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 
+- # Supabase → Project Settings → API
+NEXT_PUBLIC_SUPABASE_URL=https://kvnafvfpuctytgnbbduw.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_hencyJnRA94TSZkx8knGgg_xlsQrJ5q
+
+
 > Hanya anon key yang dipakai. **Jangan** pernah memakai `service_role` key di app ini — key itu mem-bypass RLS.
 
 ### 3. Jalankan migration
