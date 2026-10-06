@@ -47,38 +47,9 @@ npm install
 npm run dev   # http://localhost:3000
 ```
 
-## API
-Semua endpoint wajib login (cookie sesi). Tanpa login → `401`.
-
-| Method | Path | Keterangan |
-|---|---|---|
-| GET | `/api/debts?status=all\|unsettled\|settled&type=all\|owed_to_me\|i_owe` | List catatan milik user |
-| POST | `/api/debts` | Buat catatan → `201` |
-| PATCH | `/api/debts/[id]` | Update sebagian field; `{"settled": true}` untuk tandai lunas, `false` untuk batalkan |
-| DELETE | `/api/debts/[id]` | Hapus → `204` |
-
-Body POST: `type` (`owed_to_me` \| `i_owe`), `counterpart_name`, `amount` (integer rupiah > 0), `note?` (maks 200), `debt_date?` (`YYYY-MM-DD`, default hari ini), `due_date?`.
-
-Format error: `{ "error": { "message": "...", "fields": { "amount": "..." } } }`
-
-Status code: `400` parameter/JSON/ID salah · `401` belum login · `404` data tidak ada (atau bukan milikmu) · `422` validasi gagal · `500` error server.
-
-## Keamanan data (RLS)
-Tabel `debts` memakai `ENABLE` + `FORCE ROW LEVEL SECURITY`. Role `anon` dicabut semua aksesnya; role `authenticated` hanya lolos policy `auth.uid() = user_id` untuk SELECT/INSERT/UPDATE/DELETE. `user_id` di-default ke `auth.uid()` dan `WITH CHECK` mencegah insert/update atas nama orang lain.
-
-**Tes kebocoran** (langsung ke Supabase REST API, tanpa lewat Next.js):
-```bash
-SUPABASE_URL=https://xxx.supabase.co ANON_KEY=eyJ... bash scripts/rls-leak-test.sh
-```
-Skrip membuat dua user uji, lalu memastikan user B tidak bisa membaca, mengubah, menghapus, atau insert atas nama user A, dan `anon` tidak bisa membaca sama sekali. Hapus user uji dari dashboard setelahnya.
-
 ## Deploy ke Vercel
 1. Push repo ke GitHub, lalu **Import** di https://vercel.com/new
 2. Tambahkan Environment Variables `NEXT_PUBLIC_SUPABASE_URL` dan `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 3. Deploy
 4. Di Supabase **Authentication → URL Configuration**, set **Site URL** ke domain Vercel kamu (dan tambahkan ke Redirect URLs)
 
-## Catatan desain
-- Form punya field **Tanggal** (default hari ini) → kolom `debt_date`. `due_date` (jatuh tempo) tetap ada sesuai skema dan opsional di form.
-- `amount` bertipe `bigint` (rupiah utuh), dibatasi < Rp 1 triliun supaya aman sebagai angka JavaScript.
-- Next.js 16: `middleware.ts` berganti nama menjadi `proxy.ts`, dan `params` di route handler berupa Promise.
