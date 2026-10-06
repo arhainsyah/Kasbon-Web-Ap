@@ -47,9 +47,6 @@ npm install
 npm run dev   # http://localhost:3000
 ```
 
-## Deploy ke Vercel
-1. Push repo ke GitHub, lalu **Import** di https://vercel.com/new
-2. Tambahkan Environment Variables `NEXT_PUBLIC_SUPABASE_URL` dan `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-3. Deploy
-4. Di Supabase **Authentication → URL Configuration**, set **Site URL** ke domain Vercel kamu (dan tambahkan ke Redirect URLs)
+## Link Demo Vercel
+kasbon-web-ap-qdf6.vercel.app
 
